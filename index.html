@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闲鱼智能搜索</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF6B00;
+            --primary-light: #FF8C42;
+            --primary-dark: #E05D00;
+            --text-color: #333;
+            --text-light: #666;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .search-card {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .search-wrapper {
+            display: flex;
+            width: 100%;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            flex: 1;
+            padding: 16px 24px;
+            font-size: 1rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+            padding-right: 180px;
+            font-weight: 500;
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 6px;
+            top: 6px;
+            padding: 10px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .search-icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .mode-selector {
+            position: absolute;
+            right: 150px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 6px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .mode-selector:hover {
+            background: #f5f5f5;
+        }
+        
+        .mode-selector.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .mode-icon {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .engine-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .engine-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .engine-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-1px);
+        }
+        
+        .engine-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .engine-icon {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .ai-response {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .ai-response.active {
+            display: block;
+        }
+        
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .ai-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .response-title {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .response-content {
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,107,0,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        .quick-links {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .quick-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.3s ease;
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-5px);
+        }
+        
+        .link-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .link-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .link-name {
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 40px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+            width: 100%;
+        }
+        
+        .contributors {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+        }
+        
+        .contributors-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .contributor {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .contributor:last-child {
+            border-bottom: none;
+        }
+        
+        .contributor-rank {
+            width: 30px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .contributor-name {
+            flex: 1;
+        }
+        
+        .contributor-contribution {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        
+        .ai-limit {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+        
+        .ai-limit span {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .quick-links {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 15px;
+            }
+            
+            .search-box {
+                padding-right: 140px;
+            }
+            
+            .search-btn {
+                padding: 10px 16px;
+            }
+            
+            .mode-selector {
+                right: 120px;
+                padding: 6px 8px;
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .quick-links {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+            }
+            
+            .link-icon {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .link-icon svg {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .link-name {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+            </svg>
+            闲鱼智能搜索
+        </div>
+        
+        <div class="search-card">
+            <form id="searchForm">
+                <div class="search-wrapper">
+                    <input type="text" class="search-box" id="searchInput" placeholder="向AI助手提问或输入搜索内容..." autofocus>
+                    <div class="mode-selector" id="modeSelector">
+                        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+                        </svg>
+                        AI模式
+                    </div>
+                    <button type="submit" class="search-btn">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                        </svg>
+                        搜索
+                    </button>
+                </div>
+                <div class="ai-limit" id="aiLimit">今日剩余AI使用次数: <span id="aiCount">3</span>/3</div>
+            </form>
+            
+            <div class="engine-selector">
+                <button class="engine-btn active" data-engine="baidu">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 10.5v-.9h1.8v.9H4zm1.8 3.6v.9H4v-.9h1.8zm3.6-3.6h-1.8v.9h1.8v-.9zm-1.8 3.6v.9h1.8v-.9h-1.8zm1.8-2.7h-1.8v.9h1.8v-.9zM12 12h1.8v-.9H12v.9zm3.6-1.8h-1.8v.9h1.8v-.9zm-1.8 3.6v.9h1.8v-.9h-1.8zm1.8-2.7h-1.8v.9h1.8v-.9z" fill="currentColor"/>
+                    </svg>
+                    百度
+                </button>
+                <button class="engine-btn" data-engine="bing">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 5v14h14V5H5zm12.7 10.1c-.2.3-.6.5-.9.6-.4.1-.8.2-1.3.2-.4 0-.8-.1-1.1-.2-.3-.1-.6-.3-.8-.5-.2-.2-.4-.5-.5-.8-.1-.3-.2-.7-.2-1.1V9.8c0-.4.1-.8.2-1.1.1-.3.3-.6.5-.8.2-.2.5-.4.8-.5.3-.1.7-.2 1.1-.2.5 0 .9.1 1.3.2.4.1.7.3.9.6.2.3.4.6.5 1 .1.4.2.8.2 1.3v1.5c0 .6-.1 1.1-.3 1.5-.2.4-.5.8-.9 1.1zm-5.1-3.5c0 .3 0 .6.1.8v.7c0 .2.1.4.2.5.1.1.2.3.2.5.2.2 0 .4-.1.6-.2.7-.1.1-.3.2-.6.2-.3 0-.5-.1-.7-.2-.2-.1-.3-.3-.4-.5-.1-.2-.1-.5-.1-.7V9.8h-1.5v3.9c0 .4.1.8.2 1.1.1.3.3.6.5.9.2.3.5.5.8.7.3.2.7.3 1.1.4.4 0 .8-.1 1.2-.2.4-.1.7-.3 1-.5.3-.2.5-.5.7-.9.2-.4.3-.8.3-1.3V9.8h-1.5v2.3z" fill="currentColor"/>
+                    </svg>
+                    必应
+                </button>
+                <button class="engine-btn" data-engine="sm">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+                    </svg>
+                    神马
+                </button>
+                <button class="engine-btn" data-engine="google">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.5 10.8v3.7h4.3c-.2 1.1-.7 2-1.4 2.7-1.4 1.4-3.6 1.8-5.5 1-1.3-.5-2.3-1.5-2.8-2.8-.6-1.6-.2-3.4 1-4.6.7-.7 1.6-1.1 2.6-1.3 1.6 0 3 .6 4 1.6l1.4-1.4c-1.3-1.2-3-1.9-4.9-1.9-2.5 0-4.8 1.3-6.1 3.4-1.3 2.1-1.3 4.7 0 6.8 1.3 2.1 3.6 3.4 6.1 3.4 2.8 0 5.2-1.5 6.5-3.7 1.3-2.2 1.3-4.9 0-7.1-.7-1.1-1.6-2-2.7-2.7-1.1-.7-2.4-1-3.7-1-3.1 0-6 2.5-6 5.5 0 1.1.3 2.1.9 2.9l-1.3 1.3C3.8 15.1 3 13.1 3 11c0-4.1 3-7.5 7-7.5 2 0 3.8.7 5.2 1.8 1.4 1.1 2.3 2.6 2.3 4.3 0 1.7-.9 3.2-2.3 4.3-1.4 1.1-3.2 1.8-5.2 1.8-1.6 0-3.1-.6-4.2-1.7-1.1-1.1-1.7-2.6-1.7-4.2 0-1.6.6-3.1 1.7-4.2 1.1-1.1 2.6-1.7 4.2-1.7 1.9 0 3.7.8 5 2.1l1.4-1.4C16.2 4.3 13.9 3 11.5 3c-3.3 0-6.3 2.6-6.3 5.9 0 3.3 2.6 6.3 5.9 6.3 3.3 0 6.3-2.6 6.3-5.9 0-.7-.1-1.4-.3-2.1-.2-.7-.5-1.3-.9-1.9-.4-.6-.9-1.1-1.5-1.5-.6-.4-1.3-.7-2-.9-.7-.2-1.4-.3-2.1-.3-4.1 0-7.5 3.4-7.5 7.5 0 4.1 3.4 7.5 7.5 7.5 4.1 0 7.5-3.4 7.5-7.5 0-.5-.1-1-.2-1.5H12.5z" fill="currentColor"/>
+                    </svg>
+                    谷歌
+                </button>
+                <button class="engine-btn" data-engine="sogou">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+                    </svg>
+                    搜狗
+                </button>
+                <button class="engine-btn" data-engine="toutiao">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+                    </svg>
+                    头条
+                </button>
+                <button class="engine-btn" data-engine="mita">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+                    </svg>
+                    秘塔AI
+                </button>
+                <button class="engine-btn" data-engine="360">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+                    </svg>
+                    360
+                </button>
+                <button class="engine-btn" data-engine="duckduckgo">
+                    <svg class="engine-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+                    </svg>
+                    DuckDuckGo
+                </button>
+            </div>
+        </div>
+        
+        <div class="ai-response" id="aiResponse">
+            <div class="response-header">
+                <svg class="ai-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+                </svg>
+                <div class="response-title">AI助手回答</div>
+            </div>
+            <div class="response-content" id="responseContent"></div>
+        </div>
+
+        <div class="quick-links">
+            <a href="https://www.baidu.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 10.5v-.9h1.8v.9H4zm1.8 3.6v.9H4v-.9h1.8zm3.6-3.6h-1.8v.9h1.8v-.9zm-1.8 3.6v.9h1.8v-.9h-1.8zm1.8-2.7h-1.8v.9h1.8v-.9zM12 12h1.8v-.9H12v.9zm3.6-1.8h-1.8v.9h1.8v-.9zm-1.8 3.6v.9h1.8v-.9h-1.8zm1.8-2.7h-1.8v.9h1.8v-.9z" fill="#2932E1"/>
+                    </svg>
+                </div>
+                <div class="link-name">百度</div>
+            </a>
+            <a href="https://www.bing.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 5v14h14V5H5zm12.7 10.1c-.2.3-.6.5-.9.6-.4.1-.8.2-1.3.2-.4 0-.8-.1-1.1-.2-.3-.1-.6-.3-.8-.5-.2-.2-.4-.5-.5-.8-.1-.3-.2-.7-.2-1.1V9.8c0-.4.1-.8.2-1.1.1-.3.3-.6.5-.8.2-.2.5-.4.8-.5.3-.1.7-.2 1.1-.2.5 0 .9.1 1.3.2.4.1.7.3.9.6.2.3.4.6.5 1 .1.4.2.8.2 1.3v1.5c0 .6-.1 1.1-.3 1.5-.2.4-.5.8-.9 1.1zm-5.1-3.5c0 .3 0 .6.1.8v.7c0 .2.1.4.2.5.1.1.2.3.5.2.2 0 .4-.1.6-.2.7-.1.1-.3.2-.6.2-.3 0-.5-.1-.7-.2-.2-.1-.3-.3-.4-.5-.1-.2-.1-.5-.1-.7V9.8h-1.5v3.9c0 .4.1.8.2 1.1.1.3.3.6.5.9.2.3.5.5.8.7.3.2.7.3 1.1.4.4 0 .8-.1 1.2-.2.4-.1.7-.3 1-.5.3-.2.5-.5.7-.9.2-.4.3-.8.3-1.3V9.8h-1.5v2.3z" fill="#00809D"/>
+                    </svg>
+                </div>
+                <div class="link-name">必应</div>
+            </a>
+            <a href="https://www.google.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.5 10.8v3.7h4.3c-.2 1.1-.7 2-1.4 2.7-1.4 1.4-3.6 1.8-5.5 1-1.3-.5-2.3-1.5-2.8-2.8-.6-1.6-.2-3.4 1-4.6.7-.7 1.6-1.1 2.6-1.3 1.6 0 3 .6 4 1.6l1.4-1.4c-1.3-1.2-3-1.9-4.9-1.9-2.5 0-4.8 1.3-6.1 3.4-1.3 2.1-1.3 4.7 0 6.8 1.3 2.1 3.6 3.4 6.1 3.4 2.8 0 5.2-1.5 6.5-3.7 1.3-2.2 1.3-4.9 0-7.1-.7-1.1-1.6-2-2.7-2.7-1.1-.7-2.4-1-3.7-1-3.1 0-6 2.5-6 5.5 0 1.1.3 2.1.9 2.9l-1.3 1.3C3.8 15.1 3 13.1 3 11c0-4.1 3-7.5 7-7.5 2 0 3.8.7 5.2 1.8 1.4 1.1 2.3 2.6 2.3 4.3 0 1.7-.9 3.2-2.3 4.3-1.4 1.1-3.2 1.8-5.2 1.8-1.6 0-3.1-.6-4.2-1.7-1.1-1.1-1.7-2.6-1.7-4.2 0-1.6.6-3.1 1.7-4.2 1.1-1.1 2.6-1.7 4.2-1.7 1.9 0 3.7.8 5 2.1l1.4-1.4C16.2 4.3 13.9 3 11.5 3c-3.3 0-6.3 2.6-6.3 5.9 0 3.3 2.6 6.3 5.9 6.3 3.3 0 6.3-2.6 6.3-5.9 0-.7-.1-1.4-.3-2.1-.2-.7-.5-1.3-.9-1.9-.4-.6-.9-1.1-1.5-1.5-.6-.4-1.3-.7-2-.9-.7-.2-1.4-.3-2.1-.3-4.1 0-7.5 3.4-7.5 7.5 0 4.1 3.4 7.5 7.5 7.5 4.1 0 7.5-3.4 7.5-7.5 0-.5-.1-1-.2-1.5H12.5z" fill="#4285F4"/>
+                    </svg>
+                </div>
+                <div class="link-name">谷歌</div>
+            </a>
+            <a href="https://www.sogou.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#FF5500"/>
+                    </svg>
+                </div>
+                <div class="link-name">搜狗</div>
+            </a>
+            <a href="https://www.toutiao.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#FF2E4D"/>
+                    </svg>
+                </div>
+                <div class="link-name">今日头条</div>
+            </a>
+            <a href="https://www.mitaai.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#6200EA"/>
+                    </svg>
+                </div>
+                <div class="link-name">秘塔AI</div>
+            </a>
+            <a href="https://www.so.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#19B955"/>
+                    </svg>
+                </div>
+                <div class="link-name">360搜索</div>
+            </a>
+            <a href="https://duckduckgo.com" class="quick-link" target="_blank">
+                <div class="link-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="#DE5833"/>
+                    </svg>
+                </div>
+                <div class="link-name">DuckDuckGo</div>
+            </a>
+        </div>
+        <div class="contributors">
+            <div class="contributors-title">贡献者名单</div>
+            <div class="contributor">
+                <div class="contributor-rank">1</div>
+                <div class="contributor-name">000</div>
+                <div class="contributor-contribution">提供了AI服务的API秘钥</div>
+            </div>
+            <!-- 可以添加更多贡献者 -->
+        </div>
+        
+        <div class="footer">©️2025 bochao 版权所有</div>
+    </div>
+
+    <script>
+        // 当前模式 (true为AI模式，false为搜索引擎模式)
+        let isAIMode = true;
+        // 当前选中的搜索引擎
+        let currentEngine = 'baidu';
+        // AI使用次数
+        let aiUsageCount = 0;
+        const MAX_AI_USAGE = 3;
+        
+        // 从本地存储加载AI使用次数
+        function loadAIUsage() {
+            const today = new Date().toDateString();
+            const savedData = localStorage.getItem('aiUsageData');
+            
+            if (savedData) {
+                const { date, count } = JSON.parse(savedData);
+                if (date === today) {
+                    aiUsageCount = count;
+                    updateAIUsageDisplay();
+                }
+            }
+        }
+        
+        // 保存AI使用次数到本地存储
+        function saveAIUsage() {
+            const today = new Date().toDateString();
+            localStorage.setItem('aiUsageData', JSON.stringify({
+                date: today,
+                count: aiUsageCount
+            }));
+        }
+        
+        // 更新AI使用次数显示
+        function updateAIUsageDisplay() {
+            document.getElementById('aiCount').textContent = MAX_AI_USAGE - aiUsageCount;
+        }
+        
+        // 初始化加载AI使用次数
+        loadAIUsage();
+        
+        // 搜索引擎URL模板
+        const engines = {
+            baidu: 'https://www.baidu.com/s?wd=',
+            bing: 'https://www.bing.com/search?q=',
+            sm: 'https://m.sm.cn/s?q=',
+            google: 'https://www.google.com/search?q=',
+            sogou: 'https://www.sogou.com/web?query=',
+            toutiao: 'https://so.toutiao.com/search?keyword=',
+            mita: 'https://www.mitaai.com/search?q=',
+            360: 'https://www.so.com/s?q=',
+            duckduckgo: 'https://duckduckgo.com/?q='
+        };
+        
+        // 切换模式
+        document.getElementById('modeSelector').addEventListener('click', function(e) {
+            e.preventDefault();
+            isAIMode = !isAIMode;
+            this.innerHTML = isAIMode 
+                ? `<svg class="mode-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+                   </svg>AI模式`
+                : `<svg class="mode-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                   </svg>搜索模式`;
+            
+            // 更新提示文字
+            document.getElementById('searchInput').placeholder = isAIMode 
+                ? '向AI助手提问...' 
+                : '输入搜索内容...';
+        });
+        
+        // 切换搜索引擎
+        document.querySelectorAll('.engine-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 更新按钮状态
+                document.querySelectorAll('.engine-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 设置当前搜索引擎
+                currentEngine = this.getAttribute('data-engine');
+                
+                // 切换到搜索模式
+                if (isAIMode) {
+                    isAIMode = false;
+                    document.getElementById('modeSelector').innerHTML = 
+                        `<svg class="mode-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                         </svg>搜索模式`;
+                    document.getElementById('searchInput').placeholder = '输入搜索内容...';
+                }
+            });
+        });
+        
+        // 处理表单提交
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            
+            if (isAIMode) {
+                // 检查AI使用次数
+                if (aiUsageCount >= MAX_AI_USAGE) {
+                    document.getElementById('aiResponse').classList.add('active');
+                    document.getElementById('responseContent').innerHTML = 
+                        '<p style="color:red">今日AI使用次数已达上限(3次)，请明天再试。</p>';
+                    return;
+                }
+                
+                // AI模式
+                const responseArea = document.getElementById('aiResponse');
+                const contentArea = document.getElementById('responseContent');
+                
+                responseArea.classList.add('active');
+                contentArea.innerHTML = '<div class="loading"></div>';
+                
+                try {
+                    
+                    const apiKey = 'sk-0f563fed2303417daaec6b70c1f64bec'; 
+                    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "deepseek-chat",
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: query
+                                }
+                            ],
+                            temperature: 0.7
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API请求失败: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    const answer = data.choices?.[0]?.message?.content || '未收到有效回复';
+                    contentArea.innerHTML = answer;
+                    
+                    // 增加使用次数并保存
+                    aiUsageCount++;
+                    saveAIUsage();
+                    updateAIUsageDisplay();
+                } catch (error) {
+                    console.error('Error:', error);
+                    contentArea.innerHTML = `<p style="color:red">出错: ${error.message}</p>`;
+                }
+            } else {
+                // 搜索引擎模式
+                window.open(engines[currentEngine] + encodeURIComponent(query), '_self');
+            }
+        });
+        
+        // 初始聚焦搜索框
+        document.getElementById('searchInput').focus();
+    </script>
+</body>
+</html>
